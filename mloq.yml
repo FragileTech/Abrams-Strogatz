@@ -1,0 +1,36 @@
+project:
+  open_source: true
+  docker: false
+  ci: python
+  mlflow: true
+  requirements:
+  - data-viz
+  - data-science
+  git_init: false
+  git_push: null
+template:
+  project_name: abrams-strogatz-lang-comp
+  default_branch: main
+  owner: VicenteAR
+  author: Vicente Arjona Romano
+  email: vicente.arjona@hotmail.com
+  copyright_year: null
+  copyright_holder: VicenteAR
+  project_url: https://github.com/VicenteAR/abrams-strogatz-lang-comp
+  bot_name: Vicente Arjona Romano
+  bot_email: vicente.arjona@hotmail.com
+  license: MIT
+  description: Language competition study using the mean-field approximation of the
+    Abrams-Strogatz model.
+  python_versions:
+  - '3.6'
+  - '3.7'
+  - '3.8'
+  - '3.9'
+  docker_image: null
+  docstring_checks: false
+  pyproject_extra: ''
+  ci_python_version: '3.8'
+  ci_ubuntu_version: ubuntu-20.04
+  ci_extra: ''
+  git_message: null

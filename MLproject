@@ -1,0 +1,9 @@
+name: abrams_strogatz_lang_comp
+
+docker_env:
+  image: abrams_strogatz_lang_comp
+  volumes: [":/abrams_strogatz_lang_comp"]
+
+entry_points:
+  main:
+    command: "python -m abrams_strogatz_lang_comp"
