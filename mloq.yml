@@ -2,23 +2,21 @@ project:
   open_source: true
   docker: false
   ci: python
-  mlflow: true
-  requirements:
-  - data-viz
-  - data-science
+  mlflow: false
+  requirements: null
   git_init: false
   git_push: null
 template:
-  project_name: abrams-strogatz-lang-comp
+  project_name: abrams-strogatz
   default_branch: main
   owner: VicenteAR
   author: Vicente Arjona Romano
   email: vicente.arjona@hotmail.com
-  copyright_year: null
-  copyright_holder: VicenteAR
-  project_url: https://github.com/VicenteAR/abrams-strogatz-lang-comp
-  bot_name: Vicente Arjona Romano
-  bot_email: vicente.arjona@hotmail.com
+  copyright_year: 2021
+  copyright_holder: Vicente Arjona Romano
+  project_url: https://github.com/FragileTech/abrams-strogatz
+  bot_name: fragile-bot
+  bot_email: bot@fragile.tech
   license: MIT
   description: Language competition study using the mean-field approximation of the
     Abrams-Strogatz model.
