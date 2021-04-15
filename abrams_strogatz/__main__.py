@@ -1,4 +1,4 @@
-"""{{ project_name }} entry point."""
+"""abrams_strogatz entry point."""
 import sys
 
 
