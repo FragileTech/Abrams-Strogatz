@@ -1,9 +1,10 @@
+"""Abrams-strogatz language competition model."""
 import numpy as np
 
 
 def initialize_grid(height: int, width: int, prob_a: float = 0.5) -> np.ndarray:
     """
-    Creates the initial (height x width) array.
+    Create the initial (height x width) array.
 
     Each point within the (height x width) array represents a citizen speaking
     language A or language B. The default initial condition corresponds
@@ -29,7 +30,7 @@ def initialize_grid(height: int, width: int, prob_a: float = 0.5) -> np.ndarray:
 
 def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
     """
-    Periodic boundary conditions.
+    Apply periodic boundary conditions.
 
     We consider a regular lattice with periodic boundary conditions.
     per_bon function is used to apply this condition to the selected
@@ -101,7 +102,7 @@ def language_dynamics(population: np.array, status_a: float = 0.5, vol: float = 
 
 def plot_grid(population: np.array, close: bool = False):
     """
-    Plot a population grid assigning
+    Plot a population grid assigning.
 
     Graphical 2D-representation of the (mxn) array. Each site represents
     an individual speaking either language A or language B. Languages
@@ -120,6 +121,7 @@ def plot_grid(population: np.array, close: bool = False):
     """
     import matplotlib
     import matplotlib.pyplot as plt
+
     cmap = matplotlib.colors.ListedColormap(["Blue", "Red"])
     colbar_tick = np.array([-1, 1])
     fig = plt.figure()
