@@ -1,6 +1,6 @@
 current_dir = $(shell pwd)
 
-PROJECT = abrams_strogatz_lang_comp
+PROJECT = abrams_strogatz
 DOCKER_ORG = vicentear
 DOCKER_TAG ?= ${PROJECT}
 VERSION ?= latest

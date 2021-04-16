@@ -3,16 +3,16 @@ name: Push
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 env:
   PROJECT_NAME: abrams-strogatz
   PROJECT_DIR: abrams_strogatz
   VERSION_FILE: abrams_strogatz/version.py
-  DEFAULT_BRANCH: main
+  DEFAULT_BRANCH: master
   BOT_NAME: fragile-bot
   BOT_EMAIL: bot@fragile.tech
   BOT_AUTH_TOKEN: ${{ secrets.BOT_AUTH_TOKEN }}
