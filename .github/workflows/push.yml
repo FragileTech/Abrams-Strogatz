@@ -128,15 +128,6 @@ jobs:
           python setup.py bdist_wheel sdist --format=gztar
           twine check dist/*
 
-      - name: Publish package to TestPyPI
-        if: "'$TEST_PYPI_PASS' != ''"
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_PASS }}
-          repository_url: https://test.pypi.org/legacy/
-          skip_existing: true
-
       - name: Install dependencies
         run: |
           set -x
