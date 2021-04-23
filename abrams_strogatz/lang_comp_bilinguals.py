@@ -1,3 +1,4 @@
+"""This module implements the Minett-Wang bilingual model."""
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -6,7 +7,7 @@ import numpy as np
 
 
 def initial_cond(m: int, n: int, pa: float = 1./3., pb: float = 1./3.) -> np.array:
-    """Creates the initial (mxn) array.
+    """Create the initial (mxn) array representing a population of speakers.
 
     Each point within the (mxn) array represents a citizen speaking
     language A, language B, or language A and B. The default initial 
@@ -34,12 +35,11 @@ def initial_cond(m: int, n: int, pa: float = 1./3., pb: float = 1./3.) -> np.arr
 
 
 def repres(popu: np.array) -> plt.figure:
-    """Array representation.
+    """Graphical 2D-representation of the (mxn) array. 
 
-    Graphical 2D-representation of the (mxn) array. Each site represents
-    an individual speaking either language A, language B, or language A 
-    and B (bilinguals). Languages are pictured by a selection of colors 
-    (blue, white, red).
+    Each site represents an individual speaking either language A, 
+    language B, or language A and B (bilinguals). Languages are pictured
+    by a selection of colors (blue, white, red).
 
     Args:
         popu: Array containing the language spoken by the population.
@@ -62,7 +62,7 @@ def repres(popu: np.array) -> plt.figure:
     ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-        ["B", "AB", "A"])
+        ["B", "AB", "A"],)
     # To avoid an excessive computation cost, the graphical
     # representation of the lattice is not displayed. Only the figure instance
     # is returned.
@@ -71,7 +71,7 @@ def repres(popu: np.array) -> plt.figure:
 
 
 def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
-    """Periodic boundary conditions.
+    """Apply periodic boundary conditions.
 
     We consider a regular lattice with periodic boundary conditions.
     periodic_boundary function is used to apply this condition to 
@@ -100,7 +100,7 @@ def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
 
 
 def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) -> np.array:
-    """Language change.
+    """Population evolution. Change the language spoken by individuals. 
 
     Language dynamics. Evolution of the number of speakers of each
     language. Each time this function is called, it computes the
@@ -173,7 +173,7 @@ def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) 
 
 def saving_process(popu: np.array, ph: int, key: bool = True):
     """
-    Function used to save language grid plots.
+    Generate and save language grid plots.
 
     Speakers are represented in a grid. During the iterative process,
     the program will check if the selected node must change his/her
@@ -256,7 +256,7 @@ for col in range(2):
     ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     ax.set_title(title)
     fig.colorbar(
-        plot, ax=ax, ticks=colbar_tick, label="Language", fraction=0.047 * ratio
+        plot, ax=ax, ticks=colbar_tick, label="Language", fraction=0.047 * ratio,
     ).ax.set_yticklabels(["B", "AB", "A"])
 # Third plot
 for ax in axs[1, :]:
