@@ -35,7 +35,7 @@ def initial_cond(m: int, n: int, pa: float = 1.0 / 3.0, pb: float = 1.0 / 3.0) -
 
 
 def repres(popu: np.array) -> plt.figure:
-    """Graphical 2D-representation of the (mxn) array.
+    """Represent the (mxn) array.
 
     Each site represents an individual speaking either language A,
     language B, or language A and B (bilinguals). Languages are pictured
@@ -101,7 +101,7 @@ def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
 
 
 def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) -> np.array:
-    """Population evolution. Change the language spoken by individuals.
+    """Evolve the population of speakers following the Minett-Wang bilingual model.
 
     Language dynamics. Evolution of the number of speakers of each
     language. Each time this function is called, it computes the
