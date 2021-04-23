@@ -6,13 +6,13 @@ import numpy as np
 # Initial condition. Randomly distributed speakers.
 
 
-def initial_cond(m: int, n: int, pa: float = 1./3., pb: float = 1./3.) -> np.array:
+def initial_cond(m: int, n: int, pa: float = 1.0 / 3.0, pb: float = 1.0 / 3.0) -> np.array:
     """Create the initial (mxn) array representing a population of speakers.
 
     Each point within the (mxn) array represents a citizen speaking
-    language A, language B, or language A and B. The default initial 
-    condition corresponds to a scenario where the speakers are 
-    randomly distributed, the probability of each speaker being 
+    language A, language B, or language A and B. The default initial
+    condition corresponds to a scenario where the speakers are
+    randomly distributed, the probability of each speaker being
     p(A) = pa, p(B) = pb, and p(AB) = 1. - pa - pb.
 
     Args:
@@ -21,13 +21,13 @@ def initial_cond(m: int, n: int, pa: float = 1./3., pb: float = 1./3.) -> np.arr
         pa: Probability that a single node within the array speaks
             language A. Defaults to 0.33.
         pb: Probability that a single node within the array speaks
-            language B. Defaults to 0.33. 
+            language B. Defaults to 0.33.
 
     Returns:
         Returns a np.array(shape=(m, n)) where each node speaks either
         language A (represented by a value 1), language B (represented
-        by a value -1) or laguage A and B (represented by a value 0). 
-        The latter represent bilingual speakers. 
+        by a value -1) or laguage A and B (represented by a value 0).
+        The latter represent bilingual speakers.
 
     """
     popu = np.random.choice([1, 0, -1], size=(m, n), p=[pa, 1.0 - pa - pb, pb])
@@ -35,15 +35,15 @@ def initial_cond(m: int, n: int, pa: float = 1./3., pb: float = 1./3.) -> np.arr
 
 
 def repres(popu: np.array) -> plt.figure:
-    """Graphical 2D-representation of the (mxn) array. 
+    """Graphical 2D-representation of the (mxn) array.
 
-    Each site represents an individual speaking either language A, 
+    Each site represents an individual speaking either language A,
     language B, or language A and B (bilinguals). Languages are pictured
     by a selection of colors (blue, white, red).
 
     Args:
         popu: Array containing the language spoken by the population.
-            The values contained inside the array are 1 (lang A), 
+            The values contained inside the array are 1 (lang A),
             0 (bilingual) and -1 (lang B).
 
     Returns:
@@ -62,7 +62,8 @@ def repres(popu: np.array) -> plt.figure:
     ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-        ["B", "AB", "A"],)
+        ["B", "AB", "A"],
+    )
     # To avoid an excessive computation cost, the graphical
     # representation of the lattice is not displayed. Only the figure instance
     # is returned.
@@ -74,12 +75,12 @@ def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
     """Apply periodic boundary conditions.
 
     We consider a regular lattice with periodic boundary conditions.
-    periodic_boundary function is used to apply this condition to 
-    the selected node. If the node is located outside the boundaries, 
-    the neighbors are selected applying usual nearest neighbor 
-    conditions. If the node is located at the boundary, the function 
-    will return a tuple where the neighbors are selected following 
-    periodic boundary conditions (in this way, the regular lattice 
+    periodic_boundary function is used to apply this condition to
+    the selected node. If the node is located outside the boundaries,
+    the neighbors are selected applying usual nearest neighbor
+    conditions. If the node is located at the boundary, the function
+    will return a tuple where the neighbors are selected following
+    periodic boundary conditions (in this way, the regular lattice
     becomes a torus).
 
     Args:
@@ -100,7 +101,7 @@ def periodic_boundary(index: tuple, lattice_shape: tuple) -> tuple:
 
 
 def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) -> np.array:
-    """Population evolution. Change the language spoken by individuals. 
+    """Population evolution. Change the language spoken by individuals.
 
     Language dynamics. Evolution of the number of speakers of each
     language. Each time this function is called, it computes the
@@ -123,7 +124,7 @@ def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) 
 
     Args:
         popu: Array containing the language spoken by the population.
-            The values contained inside the array are 1 (lang A), 
+            The values contained inside the array are 1 (lang A),
             0 (bilingual) and -1 (lang B).
         m: Size of the array.
         n: Size of the array.
@@ -144,26 +145,26 @@ def language_dynamics(popu: np.array, m: int, n: int, s: float, a: float = 1.0) 
     nn = np.append(nn, popu[periodic_boundary((ii, jj - 1), (m, n))])  # left
     nn = np.append(nn, popu[periodic_boundary((ii, jj + 1), (m, n))])  # right
     # Number of speakers
-    nA = (nn == 1.0).sum() / 4.0   # Number A speakers
+    nA = (nn == 1.0).sum() / 4.0  # Number A speakers
     nB = (nn == -1.0).sum() / 4.0  # Number B speakers
-    nAB = 1.0 - nA - nB            # Number AB speakers 
+    nAB = 1.0 - nA - nB  # Number AB speakers
     # Language dynamics
     # If lang = 1 => prob(A->AB). If lang = -1 => prob(B->AB). If lang = 0 => prob(AB->A) and
     # prob(AB->B)
     if lang == 1:
         popu[ii, jj] = 0 if (np.random.uniform() < ((1.0 - s) * nB ** a)) else popu[ii, jj]
-    elif lang == -1: 
+    elif lang == -1:
         popu[ii, jj] = 0 if (np.random.uniform() < (s * nA ** a)) else popu[ii, jj]
     else:
-        prob_change1 = s * (nA + nAB) ** a          # Change AB -> A 
-        prob_change2 = (1 - s) * (nB + nAB) ** a    # Change AB -> B
+        prob_change1 = s * (nA + nAB) ** a  # Change AB -> A
+        prob_change2 = (1 - s) * (nB + nAB) ** a  # Change AB -> B
         u, v = np.random.uniform(), np.random.uniform()
         if (u > prob_change1) and (v > prob_change2):
-            popu[ii, jj]    # The condition is not fulfilled. 
+            popu[ii, jj]  # The condition is not fulfilled.
         else:
-            # Can occur that both p(AB->A) and p(AB->B) are satisfied at the same time. 
+            # Can occur that both p(AB->A) and p(AB->B) are satisfied at the same time.
             # We have to compute again the probability of change until only one of the conditions
-            # is satisfied. 
+            # is satisfied.
             while (u < prob_change1) and (v < prob_change2):
                 u, v = np.random.uniform(), np.random.uniform()
             popu[ii, jj] = 1 if (u < prob_change1) else -1
@@ -182,7 +183,7 @@ def saving_process(popu: np.array, ph: int, key: bool = True):
 
     Args:
         popu: Array containing the language spoken by the population.
-            The values contained inside the array are 1 (lang A), 
+            The values contained inside the array are 1 (lang A),
             0 (bilingual) and -1 (lang B).
         ph: Integer number labelling the representation. Describes the
             number of finished iterations (iterations = ph * mult).
@@ -204,8 +205,8 @@ m = 20
 n = 20
 a = 1.0
 s = 0.5
-pa = 1./3
-pb = 1./3
+pa = 1.0 / 3
+pb = 1.0 / 3
 # Initial condition
 popu = initial_cond(m, n, pa, pb)
 initial_popu = popu.copy()
@@ -214,7 +215,7 @@ na = np.count_nonzero(popu[popu > 0])
 nb = np.count_nonzero(popu[popu < 0])
 nab = (popu == 0).sum()
 print("first error") if nb != (m * n - na - nab) else None
-print("num_A = {0}, num_B = {1}, num_AB = {2}".format(na, nb, nab)) 
+print("num_A = {0}, num_B = {1}, num_AB = {2}".format(na, nb, nab))
 # Iterative process
 mult = 15
 maxit = mult * 400  # Maximum number of iterations. Information is stored
@@ -256,7 +257,11 @@ for col in range(2):
     ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
     ax.set_title(title)
     fig.colorbar(
-        plot, ax=ax, ticks=colbar_tick, label="Language", fraction=0.047 * ratio,
+        plot,
+        ax=ax,
+        ticks=colbar_tick,
+        label="Language",
+        fraction=0.047 * ratio,
     ).ax.set_yticklabels(["B", "AB", "A"])
 # Third plot
 for ax in axs[1, :]:
