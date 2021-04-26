@@ -7,14 +7,14 @@ from setuptools import find_packages, setup
 
 version = SourceFileLoader(
     "abrams_strogatz.version",
-    str(Path(__file__).parent / "abrams_strogatz" / "version.py"),
+    str(Path(__file__).parent / "language_competition" / "version.py"),
 ).load_module()
 
 with open(Path(__file__).with_name("README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="abrams_strogatz",
+    name="language_competition",
     description="Language competition study using the mean-field approximation of the Abrams-Strogatz model.",
     long_description=long_description,
     long_description_content_type="text/markdown",

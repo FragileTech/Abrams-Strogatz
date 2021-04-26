@@ -7,7 +7,7 @@ project:
   git_init: false
   git_push: null
 template:
-  project_name: abrams-strogatz
+  project_name: language_competition
   default_branch: main
   owner: VicenteAR
   author: Vicente Arjona Romano
