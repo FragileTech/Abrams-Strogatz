@@ -38,14 +38,14 @@ honor_noqa = true
 # Code coverage config
 [tool.coverage.run]
 branch = true
-source = ["abrams_strogatz_lang_comp"]
+source = ["language_competition"]
 
 [tool.coverage.report]
 exclude_lines =["no cover",
     'raise NotImplementedError',
     'if __name__ == "__main__":']
 ignore_errors = true
-omit = ["abrams_strogatz_lang_comp/tests/*"]
+omit = ["language_competition/tests/*"]
 
 # Flakehell config
 [tool.flakehell]
@@ -58,8 +58,8 @@ max_line_length = 99 # show line of source code in output
 show_source = true
 inline_quotes='"'
 import_order_style = "appnexus"
-application_package_names = ["abrams_strogatz_lang_comp"]
-application_import_names = ["abrams_strogatz_lang_comp"]
+application_package_names = ["language_competition"]
+application_import_names = ["language_competition"]
 
 [tool.flakehell.plugins]
 "flake8*" = ["+*"]
