@@ -38,8 +38,7 @@ def update_grid(
     vol: float = 1.0,
 ) -> np.array:
     """
-    Update one node of the grid containing a grid of speakers following the\
-     Abrams-Strogatz language model.
+    Update one node of the grid following the Abrams-Strogatz language model.
 
     Each time this function is called, it computes the probability of change for a selected node.
     The probability to change from language A to B is:
