@@ -1,6 +1,8 @@
 """Module containing  custom classes to study different language competition models."""
 from typing import Optional, Tuple, Union
 
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 
 import language_competition.abrams_strogatz as abrs
@@ -98,7 +100,7 @@ class SpeakersGrid:
             self._data[key] = value
 
     def __str__(self) -> str:
-        """Display the returned value when we call the print function on the class instance."""
+        """Display information of the class instance."""
         return f"{self.__class__.__name__} shape: {self.shape} n_languages: {self.n_languages}"
 
     def update(self, data: Union["SpeakersGrid", np.ndarray]):
@@ -242,6 +244,10 @@ class LanguageModel:
         """Store the different iterations of grid."""
         return np.stack(self._memory)
 
+    def __repr__(self) -> None:
+        """Display a graphical representation of the lattice."""
+        raise NotImplementedError()
+
     def reset(self) -> SpeakersGrid:
         """Create the initial grid."""
         raise NotImplementedError()
@@ -327,7 +333,7 @@ class AbramsStrogatz(LanguageModel):
             shape: (height, width) of the model grid.
             status_a: Status or prestige of the language A.
             vol: Volatility of the system. Determines the location of the
-             fixed points. Defaults to 1.0
+                fixed points. Defaults to 1.0
             prob_a0: Probability that a single node within the array speaks
                 language A. Defaults to 0.5.
         """
@@ -335,6 +341,31 @@ class AbramsStrogatz(LanguageModel):
         self.status_a = status_a
         self.vol = vol
         self.prob_a0 = prob_a0
+
+    def __repr__(self) -> None:
+        """
+        Display a graphical representation of the lattice.
+
+        Graphical 2D-representation of the (mxn) array. Each site represents
+        an individual speaking either language A or language B. Languages
+        are pictured by a binary selection of colors (blue, red).
+        """
+        col = mpl.colors.ListedColormap(["Blue", "Red"])
+        colbar_tick = np.array([-1, 1])
+        fig = plt.figure()
+        ax = plt.axes()
+        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
+        ax.set_title("Abrams-Strogatz model")
+        ax.xaxis.tick_bottom()
+        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
+        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
+        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
+        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
+        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
+            ["B", "A"],
+        )
+        plt.show()
+        return ""
 
     def reset(self) -> SpeakersGrid:
         """
@@ -418,6 +449,32 @@ class MinettWang(AbramsStrogatz):
         """
         self.prob_b0 = prob_b0
         super(MinettWang, self).__init__(shape=shape, status_a=status_a, vol=vol, prob_a0=prob_a0)
+
+    def __repr__(self) -> None:
+        """
+        Display a graphical representation of the lattice.
+
+        Graphical 2D-representation of the (mxn) array. Each site represents
+        an individual speaking either language A, language B, or language A
+        and B (bilinguals). Languages are pictured by a selection of colors
+        (blue, white, red).
+        """
+        col = mpl.colors.ListedColormap(["Blue", "White", "Red"])
+        colbar_tick = np.array([-1, 0, 1])
+        fig = plt.figure()
+        ax = plt.axes()
+        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
+        ax.set_title("Minett-Wang model")
+        ax.xaxis.tick_bottom()
+        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
+        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
+        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
+        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
+        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
+            ["B", "AB", "A"],
+        )
+        plt.show()
+        return ""
 
     def reset(self) -> SpeakersGrid:
         """
