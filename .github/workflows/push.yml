@@ -9,16 +9,16 @@ on:
       - master
 
 env:
-  PROJECT_NAME: abrams-strogatz
-  PROJECT_DIR: abrams_strogatz
-  VERSION_FILE: abrams_strogatz/version.py
+  PROJECT_NAME: language-competition
+  PROJECT_DIR: language_competition
+  VERSION_FILE: language_competition/version.py
   DEFAULT_BRANCH: master
   BOT_NAME: fragile-bot
   BOT_EMAIL: bot@fragile.tech
   BOT_AUTH_TOKEN: ${{ secrets.BOT_AUTH_TOKEN }}
   TEST_PYPI_PASS: ${{ secrets.TEST_PYPI_PASS }}
   PYPI_PASS: ${{ secrets.PYPI_PASS }}
-  DOCKER_ORG: vicentear
+  DOCKER_ORG: fragiletech
   DOCKER_USERNAME: ${{ secrets.DOCKERHUB_LOGIN }}
   DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASS }}
   PIP_CACHE: |
