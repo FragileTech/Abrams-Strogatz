@@ -132,8 +132,8 @@ class SpeakersGrid:
             are applied (if needed).
 
         Examples:
-        If the lattice is a 5x5 array, a node located at position (6, 5) will
-        result:
+            If the lattice is a 5x5 array, a node located at position (6, 5) will
+            result:
 
         >>> periodic_boundary((6, 5), (5, 5))
         (1,0)
@@ -191,6 +191,7 @@ class LanguageModel:
         shape: Tuple[int, int],
         n_languages: int,
         data: Optional[np.ndarray] = None,
+        grid: Optional[SpeakersGrid] = None,
     ):
         """
         Initialize the class.
@@ -216,7 +217,7 @@ class LanguageModel:
             Returns an object with the aforementioned parameters as
                 attributes.
         """
-        self.grid = SpeakersGrid(shape=shape, n_languages=n_languages, data=data)
+        self.grid = SpeakersGrid(shape=shape, n_languages=n_languages, data=data) if grid is None else grid
         self._memory = []
 
     @property
@@ -322,6 +323,7 @@ class AbramsStrogatz(LanguageModel):
     def __init__(
         self,
         shape: Tuple[int, int],
+        data: Optional[np.ndarray] = None,
         status_a: float = 0.5,
         vol: float = 1.0,
         prob_a0: float = 0.5,
@@ -337,7 +339,7 @@ class AbramsStrogatz(LanguageModel):
             prob_a0: Probability that a single node within the array speaks
                 language A. Defaults to 0.5.
         """
-        super(AbramsStrogatz, self).__init__(shape=shape, n_languages=self.N_LANGUAGES)
+        super(AbramsStrogatz, self).__init__(shape=shape, n_languages=self.N_LANGUAGES, data=data)
         self.status_a = status_a
         self.vol = vol
         self.prob_a0 = prob_a0
