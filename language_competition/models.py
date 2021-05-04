@@ -1,15 +1,16 @@
 """Module containing  custom classes to study different language competition models."""
 from typing import Optional, Tuple, Union
 
+from bokeh.models import FixedTicker
+import holoviews as hv
+from holoviews import opts
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-import holoviews as hv
-from holoviews import opts
-from bokeh.models import FixedTicker
 
 import language_competition.abrams_strogatz as abrs
 import language_competition.minett_wang as mw
+
 
 hv.extension("bokeh")
 
@@ -222,7 +223,9 @@ class LanguageModel:
             Returns an object with the aforementioned parameters as
                 attributes.
         """
-        self.grid = SpeakersGrid(shape=shape, n_languages=n_languages, data=data) if grid is None else grid
+        self.grid = (
+            SpeakersGrid(shape=shape, n_languages=n_languages, data=data) if grid is None else grid
+        )
         self._memory = []
 
     @property
@@ -463,7 +466,7 @@ class AbramsStrogatz(LanguageModel):
         total = speakers_a + speakers_b == (self.width * self.height) * np.ones(len(self.memory))
         if not np.all(total):
             raise ValueError(
-                "The total number of speakers does not correspond to the lattice size!"
+                "The total number of speakers does not correspond to the lattice size!",
             )
         # Plots
         colors = ["red", "blue"]
@@ -498,9 +501,8 @@ class AbramsStrogatz(LanguageModel):
             label="Speakers B",
         ).opts(color="blue")
         # Compositions
-        grids = plot_start + plot_end
         lines = plot_curvea * plot_curveb
-        layout = grids + lines
+        layout = ((plot_start + plot_end).cols(2) & lines).cols(1)
         # Options
         layout.opts(
             opts.Image(
@@ -657,11 +659,11 @@ class MinettWang(AbramsStrogatz):
         speakers_b = (grid_flat == -1).sum(1)
         speakers_ab = (grid_flat == 0).sum(1)
         total = speakers_a + speakers_b + speakers_ab == (self.width * self.height) * np.ones(
-            len(self.memory)
+            len(self.memory),
         )
         if not np.all(total):
             raise ValueError(
-                "The total number of speakers does not correspond to the lattice size!"
+                "The total number of speakers does not correspond to the lattice size!",
             )
         # Plots
         colors = ["red", "white", "blue"]
