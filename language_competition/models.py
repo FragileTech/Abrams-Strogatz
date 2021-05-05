@@ -7,13 +7,14 @@ from holoviews import opts
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import panel as pn 
 
 import language_competition.abrams_strogatz as abrs
 import language_competition.minett_wang as mw
 
 
 hv.extension("bokeh")
-
+pn.extension()
 
 class SpeakersGrid:
     """
@@ -486,12 +487,16 @@ class AbramsStrogatz(LanguageModel):
             grid_start,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-        ).opts(title="Initial grid")
+            group="grid", 
+            label="Initial"
+        )
         plot_end = hv.Image(
             grid_end,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-        ).opts(title="Final grid")
+            group="grid", 
+            label="Final"
+        )
         plot_curvea = hv.Curve(
             speakers_a,
             label="Speakers A",
@@ -502,9 +507,9 @@ class AbramsStrogatz(LanguageModel):
         ).opts(color="blue")
         # Compositions
         lines = plot_curvea * plot_curveb
-        layout = ((plot_start + plot_end).cols(2) & lines).cols(1)
+        layout = pn.Column(pn.Row(plot_start, plot_end), lines)
         # Options
-        layout.opts(
+        layout[1].opts(
             opts.Image(
                 invert_yaxis=True,
                 cmap=colors,
