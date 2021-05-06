@@ -255,7 +255,7 @@ class LanguageModel:
         return np.stack(self._memory)
 
     @property
-    def speakers(self) -> Tuple[int, ...]:
+    def speakers(self) -> str:
         """Count the number of speakers of each language."""
         raise NotImplementedError()
 
@@ -376,11 +376,11 @@ class AbramsStrogatz(LanguageModel):
         self.prob_a0 = prob_a0
 
     @property
-    def speakers(self) -> Tuple[int, int]:
+    def speakers(self) -> str: 
         """Count the number of speakers of each language."""
         num_a = (self.grid.data > 0).sum()
         num_b = (self.grid.data < 0).sum()
-        return (num_a, num_b)
+        return f"Language A speakers={num_a}. Language B speakers={num_b}"
 
     def __repr__(self) -> None:
         """
@@ -452,7 +452,7 @@ class AbramsStrogatz(LanguageModel):
         )
         self.grid.update(new_data)
 
-    def _plot(self) -> hv.Element:
+    def _plot(self) -> pn.panel:
         """
         Represent the initial and final state of the lattice.
 
@@ -470,7 +470,7 @@ class AbramsStrogatz(LanguageModel):
                 "The total number of speakers does not correspond to the lattice size!",
             )
         # Plots
-        colors = ["red", "blue"]
+        colors = ["blue", "red"]
         data_start = self.memory[0]
         data_end = self.grid.data
         grid_start = {
@@ -507,9 +507,10 @@ class AbramsStrogatz(LanguageModel):
         ).opts(color="blue")
         # Compositions
         lines = plot_curvea * plot_curveb
-        layout = pn.Column(pn.Row(plot_start, plot_end), lines)
+        grid = plot_start + plot_end
+        layout = grid + lines
         # Options
-        layout[1].opts(
+        layout.opts(
             opts.Image(
                 invert_yaxis=True,
                 cmap=colors,
@@ -526,8 +527,8 @@ class AbramsStrogatz(LanguageModel):
             ),
             opts.Curve(xlabel="Iterations", ylabel="Number of speakers", width=700),
         )
-        layout.cols(2)
-        return layout.cols(2)
+        
+        return display(pn.Column(pn.Row(plot_start, plot_end), lines))
 
 
 class MinettWang(AbramsStrogatz):
@@ -568,12 +569,12 @@ class MinettWang(AbramsStrogatz):
         super(MinettWang, self).__init__(shape=shape, status_a=status_a, vol=vol, prob_a0=prob_a0)
 
     @property
-    def speakers(self) -> Tuple[int, int, int]:
+    def speakers(self) -> str:
         """Count the number of speakers of each language."""
         num_a = (self.grid.data > 0).sum()
         num_b = (self.grid.data < 0).sum()
         num_ab = (self.grid.data == 0).sum()
-        return (num_a, num_b, num_ab)
+        return f"Language A speakers={num_a}. Language B speakers={num_b}. Bilinguals={num_ab}"
 
     def __repr__(self) -> None:
         """
@@ -650,7 +651,7 @@ class MinettWang(AbramsStrogatz):
         )
         self.grid.update(new_data)
 
-    def _plot(self) -> hv.Element:
+    def _plot(self) -> pn.panel:
         """
         Represent the initial and final state of the lattice.
 
@@ -671,7 +672,7 @@ class MinettWang(AbramsStrogatz):
                 "The total number of speakers does not correspond to the lattice size!",
             )
         # Plots
-        colors = ["red", "white", "blue"]
+        colors = ["blue", "white", "red"]
         data_start = self.memory[0]
         data_end = self.grid.data
         grid_start = {
@@ -688,17 +689,15 @@ class MinettWang(AbramsStrogatz):
             grid_start,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-            title="Initial grid",
         )
         plot_end = hv.Image(
             grid_end,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-            title="Final grid",
         )
-        plot_curvea = hv.Curve(speakers_a, label="Speakers A", color="red")
-        plot_curveb = hv.Curve(speakers_b, label="Speakers B", color="blue")
-        plot_curveab = hv.Curve(speakers_ab, label="Speakers AB", color="gray")
+        plot_curvea = hv.Curve(speakers_a, label="Speakers A").opts(color="red")
+        plot_curveb = hv.Curve(speakers_b, label="Speakers B").opts(color="blue")
+        plot_curveab = hv.Curve(speakers_ab, label="Speakers AB").opts(color="gray")
         # Compositions
         grids = plot_start + plot_end
         lines = plot_curvea * plot_curveb * plot_curveab
@@ -721,4 +720,4 @@ class MinettWang(AbramsStrogatz):
             ),
             opts.Curve(xlabel="Iterations", ylabel="Number of speakers", width=700),
         )
-        return layout.cols(1)
+        return display(pn.Column(pn.Row(plot_start, plot_end), lines))
