@@ -1,12 +1,19 @@
 """Module containing  custom classes to study different language competition models."""
 from typing import Optional, Tuple, Union
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+from bokeh.models import FixedTicker
+import holoviews as hv
+from holoviews import opts
+from IPython.core.display import display
 import numpy as np
+import panel as pn
 
 import language_competition.abrams_strogatz as abrs
 import language_competition.minett_wang as mw
+
+
+hv.extension("bokeh")
+pn.extension()
 
 
 class SpeakersGrid:
@@ -217,7 +224,9 @@ class LanguageModel:
             Returns an object with the aforementioned parameters as
                 attributes.
         """
-        self.grid = SpeakersGrid(shape=shape, n_languages=n_languages, data=data) if grid is None else grid
+        self.grid = (
+            SpeakersGrid(shape=shape, n_languages=n_languages, data=data) if grid is None else grid
+        )
         self._memory = []
 
     @property
@@ -245,6 +254,11 @@ class LanguageModel:
         """Store the different iterations of grid."""
         return np.stack(self._memory)
 
+    @property
+    def speakers(self) -> str:
+        """Count the number of speakers of each language."""
+        raise NotImplementedError()
+
     def __repr__(self) -> None:
         """Display a graphical representation of the lattice."""
         raise NotImplementedError()
@@ -265,8 +279,9 @@ class LanguageModel:
         """
         Update the values contained inside the grid.
 
-        Each time this function is called, it computes the probability
-        of change of the selected node. This function updates the values
+        Each time this function is called, it calls the function
+        'evolve_grid', which computes the probability that the selected
+        node changes its language. This function updates the values
         contained inside the _data attribute according to the chosen
         model (either Abrams-Strogatz or Minett-Wang).
 
@@ -305,17 +320,33 @@ class LanguageModel:
         self.reset()  # Initialize the model
         for _ in range(epochs):
             self.step(track=track)
+        if track:
+            self._plot()
         return self.grid
+
+    def _plot(self) -> hv.Element:
+        """
+        Display information on the initial and final state of the lattice.
+
+        Graphical representation of the lattice. The image shows the
+        initial and final state of the grid (in order to compare how
+        the network has evolved), as well as the number of speakers
+        as a function of time.
+
+        In order to apply this method, the values contained inside the
+        lattice must have been stored inside self._memory.
+        """
+        raise NotImplementedError()
 
 
 class AbramsStrogatz(LanguageModel):
     """
     Evolve the lattice following the Abrams-Strogatz model.
 
-    It applies the rules of the Abrams-Strogatz model. Given a lattice
-    site, it computes the probability that the former changes its language.
-    The number of languages is two; language A (represented by 1) and
-    language B (represented by -1).
+    This class applies the Abrams-Strogatz model to study the evolution
+    of  two languages. Given a lattice site, it computes the probability
+    that the former changes its language. The number of languages is two;
+    language A (represented by 1) and language B (represented by -1).
     """
 
     N_LANGUAGES = 2
@@ -329,7 +360,7 @@ class AbramsStrogatz(LanguageModel):
         prob_a0: float = 0.5,
     ):
         """
-        Initialize an Abrams-Strogatz language competition model.
+        Initialize the Abrams-Strogatz language competition model.
 
         Args:
             shape: (height, width) of the model grid.
@@ -344,6 +375,13 @@ class AbramsStrogatz(LanguageModel):
         self.vol = vol
         self.prob_a0 = prob_a0
 
+    @property
+    def speakers(self) -> str:
+        """Count the number of speakers of each language."""
+        num_a = (self.grid.data > 0).sum()
+        num_b = (self.grid.data < 0).sum()
+        return f"Language A speakers={num_a}. Language B speakers={num_b}"
+
     def __repr__(self) -> None:
         """
         Display a graphical representation of the lattice.
@@ -352,21 +390,35 @@ class AbramsStrogatz(LanguageModel):
         an individual speaking either language A or language B. Languages
         are pictured by a binary selection of colors (blue, red).
         """
-        col = mpl.colors.ListedColormap(["Blue", "Red"])
-        colbar_tick = np.array([-1, 1])
-        fig = plt.figure()
-        ax = plt.axes()
-        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
-        ax.set_title("Abrams-Strogatz model")
-        ax.xaxis.tick_bottom()
-        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-            ["B", "A"],
+        colors = ["blue", "red"]
+        data = self.grid.data
+        grid = {
+            "xdata": np.arange(1, data.shape[0] + 1),
+            "ydata": np.arange(1, data.shape[1] + 1),
+            "zdata": data,
+        }
+        plot = hv.Image(
+            grid,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            label="Abrams-Strogatz model",
         )
-        plt.show()
+        # Options
+        plot.opts(
+            invert_yaxis=True,
+            cmap=colors,
+            colorbar=True,
+            width=350,
+            labelled=[],
+            colorbar_opts={
+                "title": "Languages",
+                "title_text_align": "left",
+                "major_label_overrides": {-0.5: "B", 0.5: "A"},
+                "ticker": FixedTicker(ticks=[-0.5, 0.5]),
+                "major_label_text_align": "right",
+            },
+        )
+        display(plot)
         return ""
 
     def reset(self) -> SpeakersGrid:
@@ -414,6 +466,84 @@ class AbramsStrogatz(LanguageModel):
         )
         self.grid.update(new_data)
 
+    def _plot(self) -> pn.panel:
+        """
+        Represent the initial and final state of the lattice.
+
+        Graphical representation of the lattice. The image shows the
+        initial and final state of the grid (in order to compare how
+        the network has evolved), as well as the number of speakers
+        as a function of time.
+        """
+        grid_flat = self.memory.reshape(self.memory.shape[0], -1)
+        speakers_a = (grid_flat > 0).sum(1)
+        speakers_b = (grid_flat < 0).sum(1)
+        total = speakers_a + speakers_b == (self.width * self.height) * np.ones(len(self.memory))
+        if not np.all(total):
+            raise ValueError(
+                "The total number of speakers does not correspond to the lattice size!",
+            )
+        # Plots
+        colors = ["blue", "red"]
+        data_start = self.memory[0]
+        data_end = self.grid.data
+        grid_start = {
+            "xdata": np.arange(1, data_start.shape[0] + 1),
+            "ydata": np.arange(1, data_start.shape[1] + 1),
+            "zdata": data_start,
+        }
+        grid_end = {
+            "xdata": np.arange(1, data_end.shape[0] + 1),
+            "ydata": np.arange(1, data_end.shape[1] + 1),
+            "zdata": data_end,
+        }
+        plot_start = hv.Image(
+            grid_start,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            group="grid",
+            label="Initial",
+        )
+        plot_end = hv.Image(
+            grid_end,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            group="grid",
+            label="Final",
+        )
+        plot_curvea = hv.Curve(
+            speakers_a,
+            label="Speakers A",
+        ).opts(color="red")
+        plot_curveb = hv.Curve(
+            speakers_b,
+            label="Speakers B",
+        ).opts(color="blue")
+        # Compositions
+        lines = plot_curvea * plot_curveb
+        grid = plot_start + plot_end
+        layout = grid + lines
+        # Options
+        layout.opts(
+            opts.Image(
+                invert_yaxis=True,
+                cmap=colors,
+                colorbar=True,
+                width=350,
+                labelled=[],
+                colorbar_opts={
+                    "title": "Languages",
+                    "title_text_align": "left",
+                    "major_label_overrides": {-0.5: "B", 0.5: "A"},
+                    "ticker": FixedTicker(ticks=[-0.5, 0.5]),
+                    "major_label_text_align": "right",
+                },
+            ),
+            opts.Curve(xlabel="Iterations", ylabel="Number of speakers", width=700),
+        )
+
+        return display(pn.Column(pn.Row(plot_start, plot_end), lines))
+
 
 class MinettWang(AbramsStrogatz):
     """
@@ -452,6 +582,14 @@ class MinettWang(AbramsStrogatz):
         self.prob_b0 = prob_b0
         super(MinettWang, self).__init__(shape=shape, status_a=status_a, vol=vol, prob_a0=prob_a0)
 
+    @property
+    def speakers(self) -> str:
+        """Count the number of speakers of each language."""
+        num_a = (self.grid.data > 0).sum()
+        num_b = (self.grid.data < 0).sum()
+        num_ab = (self.grid.data == 0).sum()
+        return f"Language A speakers={num_a}. Language B speakers={num_b}. Bilinguals={num_ab}"
+
     def __repr__(self) -> None:
         """
         Display a graphical representation of the lattice.
@@ -461,21 +599,35 @@ class MinettWang(AbramsStrogatz):
         and B (bilinguals). Languages are pictured by a selection of colors
         (blue, white, red).
         """
-        col = mpl.colors.ListedColormap(["Blue", "White", "Red"])
-        colbar_tick = np.array([-1, 0, 1])
-        fig = plt.figure()
-        ax = plt.axes()
-        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
-        ax.set_title("Minett-Wang model")
-        ax.xaxis.tick_bottom()
-        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-            ["B", "AB", "A"],
+        colors = ["blue", "white", "red"]
+        data = self.grid.data
+        grid = {
+            "xdata": np.arange(1, data.shape[0] + 1),
+            "ydata": np.arange(1, data.shape[1] + 1),
+            "zdata": data,
+        }
+        plot = hv.Image(
+            grid,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            label="Minett-Wang model",
         )
-        plt.show()
+        # Options
+        plot.opts(
+            invert_yaxis=True,
+            cmap=colors,
+            colorbar=True,
+            width=350,
+            labelled=[],
+            colorbar_opts={
+                "title": "Languages",
+                "title_text_align": "left",
+                "major_label_overrides": {-1: "B", 0: "AB", 1: "A"},
+                "ticker": FixedTicker(ticks=[-1, 0, 1]),
+                "major_label_text_align": "right",
+            },
+        )
+        display(plot)
         return ""
 
     def reset(self) -> SpeakersGrid:
@@ -526,3 +678,74 @@ class MinettWang(AbramsStrogatz):
             vol=self.vol,
         )
         self.grid.update(new_data)
+
+    def _plot(self) -> pn.panel:
+        """
+        Represent the initial and final state of the lattice.
+
+        Graphical representation of the lattice. The image shows the
+        initial and final state of the grid (in order to compare how
+        the network has evolved), as well as the number of speakers
+        as a function of time.
+        """
+        grid_flat = self.memory.reshape(self.memory.shape[0], -1)
+        speakers_a = (grid_flat == 1).sum(1)
+        speakers_b = (grid_flat == -1).sum(1)
+        speakers_ab = (grid_flat == 0).sum(1)
+        total = speakers_a + speakers_b + speakers_ab == (self.width * self.height) * np.ones(
+            len(self.memory),
+        )
+        if not np.all(total):
+            raise ValueError(
+                "The total number of speakers does not correspond to the lattice size!",
+            )
+        # Plots
+        colors = ["blue", "white", "red"]
+        data_start = self.memory[0]
+        data_end = self.grid.data
+        grid_start = {
+            "xdata": np.arange(1, data_start.shape[0] + 1),
+            "ydata": np.arange(1, data_start.shape[1] + 1),
+            "zdata": data_start,
+        }
+        grid_end = {
+            "xdata": np.arange(1, data_end.shape[0] + 1),
+            "ydata": np.arange(1, data_end.shape[1] + 1),
+            "zdata": data_end,
+        }
+        plot_start = hv.Image(
+            grid_start,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+        )
+        plot_end = hv.Image(
+            grid_end,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+        )
+        plot_curvea = hv.Curve(speakers_a, label="Speakers A").opts(color="red")
+        plot_curveb = hv.Curve(speakers_b, label="Speakers B").opts(color="blue")
+        plot_curveab = hv.Curve(speakers_ab, label="Speakers AB").opts(color="gray")
+        # Compositions
+        grids = plot_start + plot_end
+        lines = plot_curvea * plot_curveb * plot_curveab
+        layout = grids + lines
+        # Options
+        layout.opts(
+            opts.Image(
+                invert_yaxis=True,
+                cmap=colors,
+                colorbar=True,
+                width=350,
+                labelled=[],
+                colorbar_opts={
+                    "title": "Languages",
+                    "title_text_align": "left",
+                    "major_label_overrides": {-1: "B", 0: "AB", 1: "A"},
+                    "ticker": FixedTicker(ticks=[-1, 0, 1]),
+                    "major_label_text_align": "right",
+                },
+            ),
+            opts.Curve(xlabel="Iterations", ylabel="Number of speakers", width=700),
+        )
+        return display(pn.Column(pn.Row(plot_start, plot_end), lines))
