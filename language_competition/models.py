@@ -4,10 +4,9 @@ from typing import Optional, Tuple, Union
 from bokeh.models import FixedTicker
 import holoviews as hv
 from holoviews import opts
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+from IPython.core.display import display
 import numpy as np
-import panel as pn 
+import panel as pn
 
 import language_competition.abrams_strogatz as abrs
 import language_competition.minett_wang as mw
@@ -15,6 +14,7 @@ import language_competition.minett_wang as mw
 
 hv.extension("bokeh")
 pn.extension()
+
 
 class SpeakersGrid:
     """
@@ -376,7 +376,7 @@ class AbramsStrogatz(LanguageModel):
         self.prob_a0 = prob_a0
 
     @property
-    def speakers(self) -> str: 
+    def speakers(self) -> str:
         """Count the number of speakers of each language."""
         num_a = (self.grid.data > 0).sum()
         num_b = (self.grid.data < 0).sum()
@@ -390,21 +390,35 @@ class AbramsStrogatz(LanguageModel):
         an individual speaking either language A or language B. Languages
         are pictured by a binary selection of colors (blue, red).
         """
-        col = mpl.colors.ListedColormap(["Blue", "Red"])
-        colbar_tick = np.array([-1, 1])
-        fig = plt.figure()
-        ax = plt.axes()
-        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
-        ax.set_title("Abrams-Strogatz model")
-        ax.xaxis.tick_bottom()
-        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-            ["B", "A"],
+        colors = ["blue", "red"]
+        data = self.grid.data
+        grid = {
+            "xdata": np.arange(1, data.shape[0] + 1),
+            "ydata": np.arange(1, data.shape[1] + 1),
+            "zdata": data,
+        }
+        plot = hv.Image(
+            grid,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            label="Abrams-Strogatz model",
         )
-        plt.show()
+        # Options
+        plot.opts(
+            invert_yaxis=True,
+            cmap=colors,
+            colorbar=True,
+            width=350,
+            labelled=[],
+            colorbar_opts={
+                "title": "Languages",
+                "title_text_align": "left",
+                "major_label_overrides": {-0.5: "B", 0.5: "A"},
+                "ticker": FixedTicker(ticks=[-0.5, 0.5]),
+                "major_label_text_align": "right",
+            },
+        )
+        display(plot)
         return ""
 
     def reset(self) -> SpeakersGrid:
@@ -487,15 +501,15 @@ class AbramsStrogatz(LanguageModel):
             grid_start,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-            group="grid", 
-            label="Initial"
+            group="grid",
+            label="Initial",
         )
         plot_end = hv.Image(
             grid_end,
             kdims=["xdata", "ydata"],
             vdims=hv.Dimension("zdata", range=(-1, 1)),
-            group="grid", 
-            label="Final"
+            group="grid",
+            label="Final",
         )
         plot_curvea = hv.Curve(
             speakers_a,
@@ -527,7 +541,7 @@ class AbramsStrogatz(LanguageModel):
             ),
             opts.Curve(xlabel="Iterations", ylabel="Number of speakers", width=700),
         )
-        
+
         return display(pn.Column(pn.Row(plot_start, plot_end), lines))
 
 
@@ -585,21 +599,35 @@ class MinettWang(AbramsStrogatz):
         and B (bilinguals). Languages are pictured by a selection of colors
         (blue, white, red).
         """
-        col = mpl.colors.ListedColormap(["Blue", "White", "Red"])
-        colbar_tick = np.array([-1, 0, 1])
-        fig = plt.figure()
-        ax = plt.axes()
-        plot = ax.matshow(self.grid.data, cmap=col, origin="lower", animated=True)
-        ax.set_title("Minett-Wang model")
-        ax.xaxis.tick_bottom()
-        ax.xaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.yaxis.set_major_locator(plt.MultipleLocator(2))
-        ax.xaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        ax.yaxis.set_major_formatter(lambda val, pos: r"{}".format(int(val) + 1))
-        fig.colorbar(plot, ax=ax, ticks=colbar_tick, label="Language").ax.set_yticklabels(
-            ["B", "AB", "A"],
+        colors = ["blue", "white", "red"]
+        data = self.grid.data
+        grid = {
+            "xdata": np.arange(1, data.shape[0] + 1),
+            "ydata": np.arange(1, data.shape[1] + 1),
+            "zdata": data,
+        }
+        plot = hv.Image(
+            grid,
+            kdims=["xdata", "ydata"],
+            vdims=hv.Dimension("zdata", range=(-1, 1)),
+            label="Minett-Wang model",
         )
-        plt.show()
+        # Options
+        plot.opts(
+            invert_yaxis=True,
+            cmap=colors,
+            colorbar=True,
+            width=350,
+            labelled=[],
+            colorbar_opts={
+                "title": "Languages",
+                "title_text_align": "left",
+                "major_label_overrides": {-1: "B", 0: "AB", 1: "A"},
+                "ticker": FixedTicker(ticks=[-1, 0, 1]),
+                "major_label_text_align": "right",
+            },
+        )
+        display(plot)
         return ""
 
     def reset(self) -> SpeakersGrid:
